@@ -321,7 +321,7 @@ a:hover
 #services{
     margin-top: 2em;
     padding-bottom: 2em;
-    background: linear-gradient(0deg,rgba(255,0,150,0.4),rgba(255,0,150,0.4)), url('../images/bg3.jpg');
+    background: linear-gradient(0deg,rgba(255,0,150,0.1),rgba(255,0,150,0.2)), url('../images/bg3.jpg');
     background-size: cover;
 
 }
@@ -330,7 +330,7 @@ a:hover
     margin-right: auto;
 }
 #publications{
-    background: linear-gradient(0deg,rgba(255,0,150,0.4),rgba(255,0,150,0.4)), url('../images/bg2.jpg');
+    background: linear-gradient(0deg,rgba(255,0,150,0.1),rgba(255,0,150,0.2)), url('../images/bg2.jpg');
     background-size: cover;
 }
 #xp{
