@@ -1,719 +1,817 @@
 <!DOCTYPE html>
-<html lang="en" >
-  <head>
-    <meta charset="UTF-8" />
-    <title>Melisse Cabral</title>
-    <link rel="stylesheet" href="css/style.css" />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-    />
-    <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="css/bootstrap.css" />
-    <link rel="stylesheet" href="css/animate.css" />
-    <link rel="stylesheet" href="css/bootstrap-grid.css" />
-    <link rel="stylesheet" href="css/bootstrap-reboot.css" />
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Melisse Lima — Fullstack Software Engineer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon" />
-    <link rel="icon" href="/images/favicon.ico" type="image/x-icon" />
+    :root {
+      --bg:        #0d0f14;
+      --bg2:       #13161e;
+      --bg3:       #1a1e2a;
+      --accent:    #7c6af7;
+      --accent2:   #56cfb2;
+      --text:      #e4e6f0;
+      --muted:     #7b82a0;
+      --border:    #232739;
+      --card:      #171b27;
+      --radius:    12px;
+    }
 
-    <script src="js/bootstrap.js"></script>
-    <script src="js/main.js"></script>
-  </head>
-  <body onload="loaded()">
-    <div class="overlay" id="overlay">
-      <div class="LoaderBalls">
-        <div class="LoaderBalls__item"></div>
-        <div class="LoaderBalls__item"></div>
-        <div class="LoaderBalls__item"></div>
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 4rem;
+      background: rgba(13,15,20,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-weight: 700; font-size: 1.1rem;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: .875rem;
+      font-weight: 500; transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex; align-items: center;
+      padding: 6rem 4rem 4rem;
+      position: relative; overflow: hidden;
+    }
+    .hero-grid {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr auto; gap: 4rem; align-items: center;
+      width: 100%;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(124,106,247,.12); border: 1px solid rgba(124,106,247,.3);
+      color: var(--accent); padding: .35rem .85rem; border-radius: 999px;
+      font-size: .8rem; font-weight: 600; letter-spacing: .04em;
+      margin-bottom: 1.25rem;
+    }
+    .hero-tag::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    h1 {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 800; line-height: 1.1;
+      margin-bottom: .75rem;
+    }
+    h1 span {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      color: var(--muted); font-size: 1.1rem; max-width: 540px;
+      margin-bottom: 2rem; line-height: 1.75;
+    }
+    .hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .75rem 1.75rem; border-radius: var(--radius);
+      font-weight: 600; font-size: .9rem; text-decoration: none;
+      transition: all .2s; cursor: pointer; border: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #5b4fcf);
+      color: #fff;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124,106,247,.35); }
+    .btn-outline {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    .hero-avatar {
+      width: 260px; height: 260px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      padding: 3px; flex-shrink: 0;
+    }
+    .hero-avatar img {
+      width: 100%; height: 100%; border-radius: 50%;
+      object-fit: cover; display: block;
+      background: var(--bg3);
+    }
+    .hero-socials { display: flex; gap: 1rem; margin-top: 2rem; }
+    .social-link {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--bg3); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted); text-decoration: none; transition: all .2s;
+      font-size: .95rem; font-weight: 700;
+    }
+    .social-link:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+    /* ── SECTION ── */
+    section { padding: 6rem 4rem; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-size: .8rem; font-weight: 700; letter-spacing: .12em;
+      color: var(--accent); text-transform: uppercase; margin-bottom: .75rem;
+    }
+    .section-title {
+      font-size: clamp(1.75rem, 3vw, 2.5rem);
+      font-weight: 800; margin-bottom: 1rem;
+    }
+    .section-desc { color: var(--muted); max-width: 560px; font-size: .95rem; line-height: 1.8; }
+
+    /* ── STATS ── */
+    #stats { background: var(--bg2); padding: 3rem 4rem; }
+    .stats-grid {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem;
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-size: 2.5rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-label { color: var(--muted); font-size: .85rem; margin-top: .25rem; }
+
+    /* ── SKILLS ── */
+    #skills { background: var(--bg); }
+    .skills-wrapper { margin-top: 3rem; display: flex; flex-direction: column; gap: 2.5rem; }
+    .skill-category h3 {
+      font-size: .8rem; font-weight: 700; letter-spacing: .1em;
+      color: var(--muted); text-transform: uppercase; margin-bottom: 1rem;
+    }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: .6rem; }
+    .tag {
+      padding: .4rem 1rem; border-radius: 999px;
+      font-size: .8rem; font-weight: 600;
+      font-family: 'Fira Code', monospace;
+    }
+    .tag-primary { background: rgba(124,106,247,.12); color: var(--accent); border: 1px solid rgba(124,106,247,.25); }
+    .tag-secondary { background: rgba(86,207,178,.1); color: var(--accent2); border: 1px solid rgba(86,207,178,.2); }
+    .tag-neutral { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+    .tag-cloud { background: rgba(255,153,51,.1); color: #ff9933; border: 1px solid rgba(255,153,51,.2); }
+
+    /* ── EXPERIENCE ── */
+    #experience { background: var(--bg2); }
+    .timeline { margin-top: 3rem; display: flex; flex-direction: column; gap: 0; }
+    .timeline-item {
+      display: grid; grid-template-columns: 200px 1fr;
+      gap: 2rem; position: relative; padding-bottom: 3rem;
+    }
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-item::before {
+      content: '';
+      position: absolute; left: 209px; top: 8px; bottom: 0;
+      width: 1px; background: var(--border);
+    }
+    .timeline-item:last-child::before { display: none; }
+    .timeline-dot {
+      position: absolute; left: 205px; top: 6px;
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--accent); border: 2px solid var(--bg2);
+      box-shadow: 0 0 8px var(--accent);
+    }
+    .timeline-date { color: var(--muted); font-size: .8rem; font-weight: 600; padding-top: .2rem; text-align: right; }
+    .timeline-content { padding-left: 2rem; }
+    .job-title { font-size: 1.05rem; font-weight: 700; margin-bottom: .15rem; }
+    .job-company {
+      font-size: .85rem; font-weight: 600; color: var(--accent);
+      margin-bottom: .85rem; display: flex; align-items: center; gap: .4rem;
+    }
+    .job-company span { color: var(--muted); font-weight: 400; }
+    .job-bullets { list-style: none; display: flex; flex-direction: column; gap: .5rem; }
+    .job-bullets li {
+      color: var(--muted); font-size: .875rem; line-height: 1.7;
+      padding-left: 1rem; position: relative;
+    }
+    .job-bullets li::before {
+      content: '▸'; position: absolute; left: 0;
+      color: var(--accent2); font-size: .75rem; top: .05em;
+    }
+    .job-tech { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1rem; }
+    .tech-chip {
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--muted); padding: .2rem .65rem;
+      border-radius: 6px; font-size: .72rem; font-weight: 500;
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* ── PROJECTS ── */
+    #projects { background: var(--bg); }
+    .projects-grid {
+      margin-top: 3rem;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .project-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.75rem; transition: all .25s; position: relative; overflow: hidden;
+    }
+    .project-card::before {
+      content: ''; position: absolute; top:0; left:0; right:0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0; transition: opacity .25s;
+    }
+    .project-card:hover { border-color: rgba(124,106,247,.4); transform: translateY(-4px); }
+    .project-card:hover::before { opacity: 1; }
+    .project-icon { font-size: 1.5rem; margin-bottom: 1rem; }
+    .project-name { font-size: 1.05rem; font-weight: 700; margin-bottom: .5rem; }
+    .project-desc { color: var(--muted); font-size: .85rem; line-height: 1.75; margin-bottom: 1rem; }
+
+    /* ── EDUCATION & CERTS ── */
+    #education { background: var(--bg2); }
+    .edu-grid { margin-top: 3rem; display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+    .edu-section h3 {
+      font-size: .8rem; font-weight: 700; letter-spacing: .1em;
+      color: var(--muted); text-transform: uppercase; margin-bottom: 1.5rem;
+    }
+    .edu-item {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.5rem; margin-bottom: 1rem;
+    }
+    .edu-degree { font-weight: 700; font-size: .95rem; margin-bottom: .25rem; }
+    .edu-school { color: var(--accent); font-size: .85rem; font-weight: 600; margin-bottom: .25rem; }
+    .edu-period { color: var(--muted); font-size: .8rem; }
+    .cert-badge {
+      display: flex; align-items: center; gap: 1rem;
+      background: var(--card); border: 1px solid rgba(255,153,51,.25); border-radius: var(--radius);
+      padding: 1.25rem 1.5rem; margin-bottom: 1rem;
+    }
+    .cert-icon {
+      width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
+      background: rgba(255,153,51,.15); display: flex; align-items: center;
+      justify-content: center; font-size: 1.3rem;
+    }
+    .cert-name { font-weight: 700; font-size: .9rem; }
+    .cert-issuer { color: #ff9933; font-size: .8rem; font-weight: 600; }
+    .cert-date { color: var(--muted); font-size: .75rem; }
+
+    /* ── CONTACT ── */
+    #contact { background: var(--bg); }
+    .contact-wrapper {
+      margin-top: 3rem;
+      display: grid; grid-template-columns: 1fr; gap: 4rem; align-items: start;
+      max-width: 600px;
+    }
+    .contact-info p { color: var(--muted); font-size: .95rem; line-height: 1.8; margin-bottom: 2rem; }
+    .contact-items { display: flex; flex-direction: column; gap: 1rem; }
+    .contact-item {
+      display: flex; align-items: center; gap: 1rem;
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1rem 1.25rem; text-decoration: none; color: var(--text);
+      transition: all .2s;
+    }
+    .contact-item:hover { border-color: var(--accent); transform: translateX(4px); }
+    .contact-item-icon {
+      width: 40px; height: 40px; border-radius: 9px; flex-shrink: 0;
+      background: rgba(124,106,247,.12); display: flex; align-items: center;
+      justify-content: center; font-size: 1.1rem;
+    }
+    .contact-item-label { font-size: .75rem; color: var(--muted); font-weight: 600; }
+    .contact-item-value { font-size: .9rem; font-weight: 600; }
+    .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: .4rem; }
+    label { font-size: .8rem; font-weight: 600; color: var(--muted); }
+    input, textarea {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: .85rem 1rem; color: var(--text); font-family: 'Inter', sans-serif;
+      font-size: .9rem; transition: border-color .2s; outline: none; resize: vertical;
+    }
+    input:focus, textarea:focus { border-color: var(--accent); }
+    textarea { min-height: 120px; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--bg2); border-top: 1px solid var(--border);
+      padding: 2rem 4rem; text-align: center;
+      color: var(--muted); font-size: .85rem;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── BG DECORATION ── */
+    .bg-glow {
+      position: absolute; border-radius: 50%; filter: blur(100px);
+      pointer-events: none; z-index: 0;
+    }
+    .glow-1 { width: 500px; height: 500px; background: rgba(124,106,247,.08); top: -100px; right: -100px; }
+    .glow-2 { width: 400px; height: 400px; background: rgba(86,207,178,.06); bottom: 0; left: -100px; }
+    #hero > * { position: relative; z-index: 1; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      section, #stats { padding: 4rem 1.5rem; }
+      #hero { padding: 5rem 1.5rem 3rem; }
+      .hero-grid { grid-template-columns: 1fr; text-align: center; }
+      .hero-avatar { width: 180px; height: 180px; margin: 0 auto; }
+      .hero-cta { justify-content: center; }
+      .hero-socials { justify-content: center; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .timeline-item { grid-template-columns: 1fr; }
+      .timeline-date { text-align: left; }
+      .timeline-item::before, .timeline-dot { display: none; }
+      .timeline-content { padding-left: 0; }
+      .edu-grid { grid-template-columns: 1fr; }
+      .contact-wrapper { grid-template-columns: 1fr; }
+      footer { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">melisse.dev</div>
+    <ul class="nav-links">
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#education">Education</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="bg-glow glow-1"></div>
+    <div class="bg-glow glow-2"></div>
+    <div class="hero-grid container">
+      <div>
+        <div class="hero-tag">Available for opportunities</div>
+        <h1>Melisse Lima<br /><span>Fullstack Engineer</span></h1>
+        <p class="hero-sub">
+          Senior Software Developer specialising in React.js, React Native, Node.js and AWS.
+          7+ years building scalable web and mobile products across Brazil, the US and the UK.
+        </p>
+        <div class="hero-cta">
+          <a href="#contact" class="btn btn-primary">Get in touch</a>
+          <a href="#experience" class="btn btn-outline">View experience</a>
+        </div>
+        <div class="hero-socials">
+          <a href="https://github.com/MelisseCabral" target="_blank" class="social-link" title="GitHub">GH</a>
+          <a href="https://www.linkedin.com/in/melisse-p-cabral-48b963117/" target="_blank" class="social-link" title="LinkedIn">in</a>
+          <a href="mailto:melissecabral@gmail.com" class="social-link" title="Email">@</a>
+          <a href="https://api.whatsapp.com/send?phone=5585999616120" target="_blank" class="social-link" title="WhatsApp">WA</a>
+        </div>
+      </div>
+      <div>
+        <div class="hero-avatar">
+          <img src="https://melisselima.github.io/images/Profile.jpeg" alt="Melisse Lima" />
+        </div>
       </div>
     </div>
+  </section>
 
-    <header>
-      <nav>
-        <ul class="nav justify-content-center noselectble">
-          <li class="nav-item">
-            <a
-              class="nav-link active"
-              onclick="{smoothScroll(document.getElementById('bio'))}"
-              >Bio</a
-            >
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              onclick="{smoothScroll(document.getElementById('skills'))}"
-              >Skills</a
-            >
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              onclick="{smoothScroll(document.getElementById('xp'))}"
-              >Experience</a
-            >
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              onclick="{smoothScroll(document.getElementById('publications'))}"
-              >Publications</a
-            >
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              onclick="{smoothScroll(document.getElementById('portifolio'))}"
-              >Portifolio</a
-            >
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              onclick="{smoothScroll(document.getElementById('contact'))}"
-              >Contact</a
-            >
-          </li>
-        </ul>
-      </nav>
-      <div class="jumbotron">
-        <div class="container">
-          <img class="photo_profile noselectble" src="images/Profile.jpeg" />
-          <h1 class="display-4">Melisse Cabral</h1>
-          <p class="lead second-text" style="font-size: 15px;">Web Developer</p>
+  <!-- STATS -->
+  <div id="stats">
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-num">7+</div><div class="stat-label">Years of Experience</div></div>
+      <div class="stat"><div class="stat-num">8</div><div class="stat-label">Companies &amp; Clients</div></div>
+      <div class="stat"><div class="stat-num">10+</div><div class="stat-label">Projects Shipped</div></div>
+      <div class="stat"><div class="stat-num">AWS</div><div class="stat-label">Cloud Practitioner Certified</div></div>
+    </div>
+  </div>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <div class="container">
+      <div class="section-label">Tech Stack</div>
+      <h2 class="section-title">Skills &amp; Technologies</h2>
+      <p class="section-desc">
+        A broad toolkit built across years of production engineering — from pixel-perfect UIs to cloud infrastructure.
+      </p>
+      <div class="skills-wrapper">
+        <div class="skill-category">
+          <h3>Frontend</h3>
+          <div class="skill-tags">
+            <span class="tag tag-primary">React.js</span>
+            <span class="tag tag-primary">Next.js</span>
+            <span class="tag tag-primary">React Native</span>
+            <span class="tag tag-primary">TypeScript</span>
+            <span class="tag tag-primary">Redux</span>
+            <span class="tag tag-primary">JavaScript</span>
+            <span class="tag tag-primary">HTML5</span>
+            <span class="tag tag-primary">CSS3</span>
+            <span class="tag tag-primary">Storybook</span>
+            <span class="tag tag-primary">Material-UI</span>
+          </div>
         </div>
-
-        <ul class="ul-social noselectble">
-          <li class="li-social grow">
-            <a target="_blank" href="https://github.com/MelisseCabral"
-              ><img src="images/gh.png"
-            /></a>
-          </li>
-          <li class="li-social grow">
-            <a
-              target="_blank"
-              href="https://www.linkedin.com/in/melisse-p-cabral-48b963117/"
-            >
-              <img src="images/in.png"
-            /></a>
-          </li>
-          <li class="li-social grow">
-            <a target="_blank" href="https://www.facebook.com/melisse.cabral">
-              <img src="images/fb.png"
-            /></a>
-          </li>
-        </ul>
+        <div class="skill-category">
+          <h3>Backend</h3>
+          <div class="skill-tags">
+            <span class="tag tag-secondary">Node.js</span>
+            <span class="tag tag-secondary">NestJS</span>
+            <span class="tag tag-secondary">Express.js</span>
+            <span class="tag tag-secondary">Python</span>
+            <span class="tag tag-secondary">Flask</span>
+            <span class="tag tag-secondary">Java</span>
+            <span class="tag tag-secondary">C#</span>
+            <span class="tag tag-secondary">.NET</span>
+            <span class="tag tag-secondary">PHP</span>
+            <span class="tag tag-secondary">Swift / SwiftUI</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h3>Data</h3>
+          <div class="skill-tags">
+            <span class="tag tag-neutral">PostgreSQL</span>
+            <span class="tag tag-neutral">MongoDB</span>
+            <span class="tag tag-neutral">MySQL</span>
+            <span class="tag tag-neutral">Oracle / PL-SQL</span>
+            <span class="tag tag-neutral">SQLite</span>
+            <span class="tag tag-neutral">Firebase / Firestore</span>
+            <span class="tag tag-neutral">Prisma</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h3>Cloud &amp; DevOps</h3>
+          <div class="skill-tags">
+            <span class="tag tag-cloud">AWS (ECS · S3 · CloudFront)</span>
+            <span class="tag tag-cloud">Azure</span>
+            <span class="tag tag-cloud">Docker</span>
+            <span class="tag tag-cloud">Terraform</span>
+            <span class="tag tag-cloud">CircleCI</span>
+            <span class="tag tag-cloud">GitHub Actions</span>
+            <span class="tag tag-cloud">CI / CD</span>
+            <span class="tag tag-cloud">Prometheus · Grafana</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h3>Tools &amp; Methods</h3>
+          <div class="skill-tags">
+            <span class="tag tag-neutral">REST API</span>
+            <span class="tag tag-neutral">Microservices</span>
+            <span class="tag tag-neutral">SSR / SSG</span>
+            <span class="tag tag-neutral">Jest</span>
+            <span class="tag tag-neutral">Cypress</span>
+            <span class="tag tag-neutral">React Testing Library</span>
+            <span class="tag tag-neutral">Swagger</span>
+            <span class="tag tag-neutral">Figma</span>
+          </div>
+        </div>
       </div>
-      <a
-        class="contactWtt"
-        target="_blank"
-        href="https://api.whatsapp.com/send?phone=5585999616120&text=Olá"
-        ><img class="wtt" src="images/wtt.png"
-      /></a>
-    </header>
-    <main>
-      <section id="bio">
-        <div id="info">
-          <div style="text-align: left;">
-            <p><strong>Name :</strong></p>
-            <p><strong>Phone : </strong></p>
-            <p><strong>Email : </strong></p>
-          </div>
-          <div>
-            <p>Melisse Pontes Cabral</p>
-            <p>+55 85 9 9961 6120</p>
-            <p>melissecabral@gmail.com</p>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <div class="container">
+      <div class="section-label">Career</div>
+      <h2 class="section-title">Professional Experience</h2>
+      <div class="timeline">
+
+        <div class="timeline-item">
+          <div class="timeline-date">Feb 2023 — Present</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="job-title">Senior Software Engineer</div>
+            <div class="job-company">Vigil <span>· England, UK</span></div>
+            <ul class="job-bullets">
+              <li>Rebuilt a legacy WordPress/PHP CMS into a modern, scalable Node.js content platform supporting 75+ British newspaper brands.</li>
+              <li>Built a performant front-end architecture using Next.js with SSR and SSG for fast page loads and SEO optimisation.</li>
+              <li>Designed and implemented a robust RESTful API powering editorial tools, websites and mobile apps.</li>
+              <li>Orchestrated infrastructure using Terraform with full automation across staging and production environments.</li>
+              <li>Integrated CI/CD pipelines with CircleCI enabling rapid, reliable deployments across microservices and front-end layers.</li>
+              <li>Wrote unit, integration and E2E tests using React Testing Library, Jest and Cypress.</li>
+            </ul>
+            <div class="job-tech">
+              <span class="tech-chip">Next.js</span><span class="tech-chip">ReactJS</span><span class="tech-chip">TypeScript</span><span class="tech-chip">Node.js</span><span class="tech-chip">Redux</span><span class="tech-chip">Terraform</span><span class="tech-chip">CircleCI</span><span class="tech-chip">Python</span>
+            </div>
           </div>
         </div>
 
-        <div id="presentation">
-          <h1 style="text-align: left !important; margin-left: 2em;">Hello!</h1>
-          <p
-            id="aboutMe"
-            style="text-align: left !important; margin-left: 5em;"
-          >
-            Student, myage years old, currently pursuing a Bachelor Degree at
-            Computer Engineering at Federal University of Ceará. I had the
-            opportunity to know a lot of programming paradigms and languages but
-            preferably I look for web development tools and cross platform using
-            mostly Javascript and NodeJS frameworks. I also code mobile apps,
-            Native IOs in Swift and Android with Java.
+        <div class="timeline-item">
+          <div class="timeline-date">Dec 2021 — Feb 2023</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="job-title">Senior Software Engineer</div>
+            <div class="job-company">Banco do Brasil <span>· Brazil</span></div>
+            <ul class="job-bullets">
+              <li>Developed a native iOS app in Swift to manage investment portfolios and execute asset transactions for the oldest financial institution in Brazil.</li>
+              <li>Upgraded architecture from Storyboard to Coordinator pattern + SwiftUI, reducing coupling and improving component reuse.</li>
+              <li>Developed a hybrid React Native app for business checking accounts covering credit cards, limits and invoices.</li>
+              <li>Created and maintained Java endpoints in a microservice architecture.</li>
+            </ul>
+            <div class="job-tech">
+              <span class="tech-chip">Swift</span><span class="tech-chip">SwiftUI</span><span class="tech-chip">React Native</span><span class="tech-chip">React.js</span><span class="tech-chip">TypeScript</span><span class="tech-chip">Java</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">May 2022 — Feb 2023</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="job-title">Software Engineer</div>
+            <div class="job-company">Tino <span>· Brazil</span></div>
+            <ul class="job-bullets">
+              <li>Collaborated on a web platform allowing merchants to restock inventory based on credit card receivables.</li>
+              <li>Developed a private React component library with Storybook for efficient, reusable interface building.</li>
+              <li>Translated Figma designs into high-quality ReactJS components.</li>
+            </ul>
+            <div class="job-tech">
+              <span class="tech-chip">ReactJS</span><span class="tech-chip">Redux</span><span class="tech-chip">TypeScript</span><span class="tech-chip">Storybook</span><span class="tech-chip">Jest</span><span class="tech-chip">Cypress</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">Oct 2021 — Sep 2022</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="job-title">Senior Consultant Engineer</div>
+            <div class="job-company">Neurogram <span>· Atlanta, USA · Part-time</span></div>
+            <ul class="job-bullets">
+              <li>Built a web app for neurophysiologists featuring AI-powered EEG and echocardiogram analysis tools.</li>
+              <li>Developed a React Native mobile app for AI analysis of echocardiogram photos to identify congenital diseases.</li>
+              <li>Built the Cardium CRUD API with NestJS, Prisma (PostgreSQL) and TypeScript, documented with Swagger.</li>
+              <li>Deployed APIs on AWS ECS via Docker; served a React.js app from S3 + CloudFront using GitHub Actions.</li>
+            </ul>
+            <div class="job-tech">
+              <span class="tech-chip">React.js</span><span class="tech-chip">React Native</span><span class="tech-chip">Python</span><span class="tech-chip">NestJS</span><span class="tech-chip">PostgreSQL</span><span class="tech-chip">AWS</span><span class="tech-chip">Docker</span><span class="tech-chip">GitHub Actions</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">Jul 2021 — May 2022</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="job-title">Software Engineer Research</div>
+            <div class="job-company">Instituto Atlântico <span>· Brazil · Client: HP</span></div>
+            <ul class="job-bullets">
+              <li>Designed HP solutions using C# and .NET; created PoCs for edge compute applications.</li>
+              <li>Hosted and maintained company infrastructure on Azure; performed metric analysis with Grafana, Prometheus and SolarWinds.</li>
+              <li>Developed APIs on .NET and used MongoDB for data storage.</li>
+            </ul>
+            <div class="job-tech">
+              <span class="tech-chip">C#</span><span class="tech-chip">.NET</span><span class="tech-chip">Azure</span><span class="tech-chip">MongoDB</span><span class="tech-chip">Grafana</span><span class="tech-chip">Prometheus</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">Sep 2020 — Jul 2021</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="job-title">Software Fullstack Developer</div>
+            <div class="job-company">LIV Saúde <span>· Brazil</span></div>
+            <ul class="job-bullets">
+              <li>Developed a digital medical record platform for telemedicine and digital prescriptions using React.js, Redux and Material-UI.</li>
+              <li>Built the back-end with Node.js, Express.js and NestJS handling complex business rules and database communication.</li>
+              <li>Designed and maintained databases with PostgreSQL, PL/SQL and Oracle.</li>
+            </ul>
+            <div class="job-tech">
+              <span class="tech-chip">React.js</span><span class="tech-chip">Node.js</span><span class="tech-chip">NestJS</span><span class="tech-chip">Redux</span><span class="tech-chip">PostgreSQL</span><span class="tech-chip">Oracle</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">Sep 2018 — May 2020</div>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="job-title">Software Developer</div>
+            <div class="job-company">Ilumini Engenharia <span>· Brazil</span></div>
+            <ul class="job-bullets">
+              <li>Built a platform from scratch for solar energy sales management — proposals, contracts and invoicing.</li>
+              <li>Used Node.js + Firebase Cloud Functions to streamline the sales process and centralise documentation.</li>
+            </ul>
+            <div class="job-tech">
+              <span class="tech-chip">JavaScript</span><span class="tech-chip">Node.js</span><span class="tech-chip">Firebase</span><span class="tech-chip">HTML</span><span class="tech-chip">CSS</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="container">
+      <div class="section-label">Portfolio</div>
+      <h2 class="section-title">Selected Projects</h2>
+      <p class="section-desc">A mix of professional work and personal builds across web, mobile and AI.</p>
+      <p class="section-desc" style="margin-top:.5rem; margin-bottom: 0">
+        Highlighting a few selected works below — see the full list on
+        <a href="https://github.com/MelisseCabral" target="_blank" style="color:var(--accent); text-decoration:none; font-weight:600">GitHub</a>.
+      </p>
+      <div class="projects-grid">
+
+        <div class="project-card">
+          <div class="project-icon">📰</div>
+          <div class="project-name">DC Thompson Content Platform</div>
+          <p class="project-desc">Modern Node.js CMS replacing a legacy WordPress stack to power 75+ British newspaper brands with SSR/SSG and full CI/CD.</p>
+          <div class="skill-tags"><span class="tag tag-primary">Next.js</span><span class="tag tag-secondary">Node.js</span><span class="tag tag-cloud">Terraform</span></div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-icon">🧠</div>
+          <div class="project-name">Neurogram / Cardium</div>
+          <p class="project-desc">Web &amp; mobile app for neurophysiologists using AI to analyse EEG and echocardiogram results. Deployed on AWS ECS + CloudFront.</p>
+          <div class="skill-tags"><span class="tag tag-primary">React Native</span><span class="tag tag-secondary">Python</span><span class="tag tag-cloud">AWS</span></div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-icon">💊</div>
+          <div class="project-name">LIV Saúde — Telemedicine</div>
+          <p class="project-desc">Digital medical record platform featuring telemedicine consultations and electronic prescriptions for a Brazilian health operator.</p>
+          <div class="skill-tags"><span class="tag tag-primary">React.js</span><span class="tag tag-secondary">NestJS</span><span class="tag tag-neutral">PostgreSQL</span></div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-icon">📱</div>
+          <div class="project-name">Banco do Brasil iOS App</div>
+          <p class="project-desc">Native iOS investment app in Swift/SwiftUI for Brazil's oldest bank, migrated from Storyboard to a Coordinator/SwiftUI architecture.</p>
+          <div class="skill-tags"><span class="tag tag-primary">Swift</span><span class="tag tag-primary">SwiftUI</span><span class="tag tag-secondary">Java</span></div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-icon">☀️</div>
+          <div class="project-name">Ilumini — Solar Sales Platform</div>
+          <p class="project-desc">Full-stack web application to manage photovoltaic project proposals, contracts, and invoicing for a civil construction company.</p>
+          <div class="skill-tags"><span class="tag tag-secondary">Node.js</span><span class="tag tag-neutral">Firebase</span><span class="tag tag-primary">JavaScript</span></div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-icon">📡</div>
+          <div class="project-name">Radar Dev</div>
+          <p class="project-desc">ReactJS and React Native app that lists nearby developers — real-time location + dev profiles powered by a Node.js backend.</p>
+          <div class="skill-tags"><span class="tag tag-primary">React Native</span><span class="tag tag-primary">React.js</span><span class="tag tag-secondary">Node.js</span></div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-icon">🤖</div>
+          <div class="project-name">IR Drive Automation</div>
+          <p class="project-desc">Published research — residential IR automation device for the Brazilian market using Arduino IDE. Presented at CONAPESC 2017.</p>
+          <div class="skill-tags"><span class="tag tag-neutral">Arduino</span><span class="tag tag-neutral">C++</span><span class="tag tag-neutral">Hardware</span></div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-icon">🏎️</div>
+          <div class="project-name">Formula SAE Telemetry</div>
+          <p class="project-desc">Co-authored telemetry system for automotive competition using Arduino and Visual Studio. Published at CONAPESC 2017.</p>
+          <div class="skill-tags"><span class="tag tag-neutral">Arduino</span><span class="tag tag-neutral">GRBL</span><span class="tag tag-neutral">Embedded</span></div>
+        </div>
+
+      </div>
+      <div style="text-align:center; margin-top: 2.5rem;">
+        <a href="https://github.com/MelisseCabral" target="_blank" class="btn btn-outline">
+          View all projects on GitHub →
+        </a>
+      </div>
+    </div>
+  </section>
+  <section id="education">
+    <div class="container">
+      <div class="section-label">Background</div>
+      <h2 class="section-title">Education &amp; Certifications</h2>
+      <div class="edu-grid">
+        <div class="edu-section">
+          <h3>Academic</h3>
+          <div class="edu-item">
+            <div class="edu-degree">Postgraduate in Solution Architecture</div>
+            <div class="edu-school">Universidade Pitágoras</div>
+            <div class="edu-period">May 2024 — Dec 2024</div>
+          </div>
+          <div class="edu-item">
+            <div class="edu-degree">Postgraduate in IT Infrastructure Architecture &amp; Management</div>
+            <div class="edu-school">Universidade Pitágoras</div>
+            <div class="edu-period">May 2024 — Dec 2024</div>
+          </div>
+          <div class="edu-item">
+            <div class="edu-degree">Associate Degree — Systems Development Analyst</div>
+            <div class="edu-school">Faculdade Maurício de Nassau</div>
+            <div class="edu-period">Jan 2022 — Feb 2024</div>
+          </div>
+          <div class="edu-item">
+            <div class="edu-degree">Bachelor's in Computer Engineering</div>
+            <div class="edu-school">Universidade Federal do Ceará</div>
+            <div class="edu-period">2017 — ongoing</div>
+          </div>
+        </div>
+        <div class="edu-section">
+          <h3>Certifications</h3>
+          <div class="cert-badge">
+            <div class="cert-icon">☁️</div>
+            <div>
+              <div class="cert-name">AWS Certified Cloud Practitioner</div>
+              <div class="cert-issuer">Amazon Web Services</div>
+              <div class="cert-date">Feb 2023 — Feb 2029</div>
+            </div>
+          </div>
+          <h3 style="margin-top:2rem">Publications</h3>
+          <div class="edu-item" style="margin-top:1rem">
+            <div class="edu-degree">IR Drive with Generic Actuator Device</div>
+            <div class="edu-school">II CONAPESC — 2017</div>
+          </div>
+          <div class="edu-item">
+            <div class="edu-degree">Telemetry Prototype for Formula SAE</div>
+            <div class="edu-school">II CONAPESC — 2017</div>
+          </div>
+          <div class="edu-item">
+            <div class="edu-degree">SPI Communication Between ARM Cortex-M4 Microcontrollers</div>
+            <div class="edu-school">II CONAPESC — 2017</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="container">
+      <div class="section-label">Let's talk</div>
+      <h2 class="section-title">Get in Touch</h2>
+      <div class="contact-wrapper">
+        <div class="contact-info">
+          <p>
+            I'm always open to discussing new projects, creative ideas or opportunities to be part of your vision.
+            Feel free to reach out through any of the channels below.
           </p>
-        </div>
-      </section>
-      <section id="skills-cont">
-        <h3>Skills</h3>
-
-       <div class="row" style="margin: auto; display: inline-flex;">
-          <div class="skills-set">
-          <div class="skill">
-            <div class="skill-name">html</div>
-            <div class="skill-bar">
-              <div class="skill-per good" per="95"></div>
-            </div>
-          </div>
-          <div class="skill">
-            <div class="skill-name">JavaScript</div>
-            <div class="skill-bar">
-              <div class="skill-per good" per="80"></div>
-            </div>
-          </div>
-          <div class="skill">
-            <div class="skill-name">CSS</div>
-            <div class="skill-bar">
-              <div class="skill-per good" per="80"></div>
-            </div>
-          </div>
-          <div class="skill">
-            <div class="skill-name">Java</div>
-            <div class="skill-bar">
-              <div class="skill-per good" per="70"></div>
-            </div>
-          </div>
-        </div>
-        <div class="skills-set">
-          <div class="skill">
-            <div class="skill-name">Python</div>
-            <div class="skill-bar">
-              <div class="skill-per good" per="70"></div>
-            </div>
-          </div>
-          <div class="skill">
-            <div class="skill-name">Swift</div>
-            <div class="skill-bar">
-              <div class="skill-per media" per="65"></div>
-            </div>
-          </div>
-          <div class="skill">
-            <div class="skill-name">c#</div>
-            <div class="skill-bar">
-              <div class="skill-per media" per="55"></div>
-            </div>
-          </div>
-          <div class="skill">
-            <div class="skill-name">PHP</div>
-            <div class="skill-bar">
-              <div class="skill-per bad" per="30"></div>
-            </div>
-          </div>
-        </div>
-       </div>
-       <div class="badges">
-        <span class="badge badge-pill badge-primary">Jquery</span>
-        <span class="badge badge-pill badge-secondary">Bootstrap</span>
-        <span class="badge badge-pill badge-success">NodeJS</span>
-        <span class="badge badge-pill badge-success">ExpressJS</span>
-        <span class="badge badge-pill badge-danger">ReactNative</span>
-        <span class="badge badge-pill badge-warning">Firebase</span>
-        <span class="badge badge-pill badge-info">ReactJs</span>
-        <span class="badge badge-pill badge-dark">MongoDB</span>
-        <span class="badge badge-pill badge-secondary">MySql</span>
-        <span class="badge badge-pill badge-info">Docker</span>
-        <span class="badge badge-pill badge-secondary">SqLite</span>
-       </div>
-      </section>
-      <section id="services">
-        <h3 style="color: whitesmoke;">Services</h3>
-        <div class="card-group centred container-services">
-          <div class="box1">
-            <i class="material-icons noselectble bigicon">public</i>
-            <h2 class='serviceTitle'>Web Design</h2>
-            <p class="describe-service">
-              Advertising and presentation web pages for companies.
-            </p>
-          </div>
-          <div class="box1">
-            <i class="material-icons noselectble bigicon">color_lens</i>
-            <h2>Branding</h2>
-            <p class="describe-service">Creation and renewal of logos.</p>
-          </div>
-          <div class="box1">
-            <i class="material-icons noselectble bigicon">code</i>
-            <h2>Web Developer</h3>
-            <p class="describe-service">
-              Software development for various business areas.
-            </p>
-          </div>
-          <div class="box1">
-            <i class="material-icons noselectble bigicon">phone</i>
-            <h2>Support</h2>
-            <p class="describe-service">Product Support and Maintenance.</p>
-          </div>
-        </div>
-      </section>
-      <section id="xp">
-        <div id="content-xp" class="col-6">
-          <h3>Experiences</h3>
-
-          <div class="container-fluid text-center">
-            <div class="">
-              <h5 class="card-title">Supervised Internship</h5>
-              <p class="card-text text-center subtitle-card">
-                University Federal of Ceará / Department of Health Municipal of
-                Sobral
-              </p>
-              <p class="card-text text-center">
-                Write, review, and rewrite web pages, using JS, HTML, CSS, PHP
-                and postgres database.
-              </p>
-              <p class="card-text">07/2018 - 11/2018</p>
-              <br />
-            </div>
-
-            <div class="">
-              <h5 class="card-title">
-                Institutional Program of Technological Development
-              </h5>
-              <p class="card-text text-center subtitle-card">
-                University Federal of Ceará
-              </p>
-              <p class="card-text text-center">
-                Basic maintenance of computer networks
-              </p>
-              <p class="card-text">03/2019 - 06/2019</p>
-            </div>
+          <div class="contact-items">
+            <a href="mailto:melissecabral@gmail.com" class="contact-item">
+              <div class="contact-item-icon">✉️</div>
+              <div>
+                <div class="contact-item-label">Email</div>
+                <div class="contact-item-value">melissecabral@gmail.com</div>
+              </div>
+            </a>
+            <a href="https://www.linkedin.com/in/melisse-p-cabral-48b963117/" target="_blank" class="contact-item">
+              <div class="contact-item-icon">💼</div>
+              <div>
+                <div class="contact-item-label">LinkedIn</div>
+                <div class="contact-item-value">melisse-p-cabral</div>
+              </div>
+            </a>
+            <a href="https://github.com/MelisseCabral" target="_blank" class="contact-item">
+              <div class="contact-item-icon">🐙</div>
+              <div>
+                <div class="contact-item-label">GitHub</div>
+                <div class="contact-item-value">@MelisseCabral</div>
+              </div>
+            </a>
+            <a href="https://api.whatsapp.com/send?phone=5585999616120" target="_blank" class="contact-item">
+              <div class="contact-item-icon">📱</div>
+              <div>
+                <div class="contact-item-label">WhatsApp</div>
+                <div class="contact-item-value">+55 85 9 9961-6120</div>
+              </div>
+            </a>
           </div>
         </div>
 
-        <div class="col-6" id="education">
-          <h3>Education</h3>
-
-          <div class="container-fluid text-center">
-            <div class="educ-card">
-              <h5 class="card-title">Bachelor's em Computer Engineer</h5>
-              <p class="card-text text-center subtitle-card">
-                University Federal of Ceará
-              </p>
-              <p class="card-text">2017 - At this day</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="publications">
-        <h3 style="color: whitesmoke;">Publications</h3>
-        <div class="container-fluid centred">
-          <div class="card-group">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title title-article">
-                  IR Drive with Generic Actuator Device
-                </h5>
-                <p class="title-article">
-                  <span
-                    >Author - II CONAPESC - 2017 -
-                    <a
-                      href="https://github.com/MelisseCabral/ir_control"
-                      target="_blank"
-                      class="btn-link"
-                      >Github</a
-                    ></span
-                  >
-                </p>
-                <p class="card-text text-justify text-left">
-                  This report proposes to present the development of a
-                  residential automation destined to be manufactured in the
-                  Brazilian industry. They were used to carry out the project by
-                  developing free software like Arduino IDE. During the report,
-                  several development environments will be presented, targeting
-                  not only the hardware, but also the software and the results
-                  of the final object.
-                </p>
-                <a
-                  class="btn btn-transparent btn-purple bottom-btn"
-                  target="_blank"
-                  href="http://editorarealize.com.br/revistas/conapesc/trabalhos/TRABALHO_EV070_MD1_SA16_ID1626_02052017190256.pdf"
-                  >Read</a
-                >
-              </div>
-            </div>
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title title-article">
-                  Telemetry Prototype Destinated to Formula SAE
-                </h5>
-                <p class="title-article">
-                  <span
-                    >Coauthor - II CONAPESC - 2017 -
-                    <a
-                      href="https://github.com/MelisseCabral/Telemetria-Formula-SAE"
-                      target="_blank"
-                      class="btn-link"
-                      >Github</a
-                    ></span
-                  >
-                </p>
-                <p class="card-text text-justify text-left">
-                  This report proposes to expose the development of a telemetry
-                  destined to the automotive world, specifically for the Formula
-                  SAE competition. They were used to carry out the project, free
-                  software development as Arduino IDE and Visual Studio. During
-                  the report will be presented diverse environments of
-                  developments, aimed not only the hardware, but as well as the
-                  software. Obtaining as well as the results of the final
-                  object, as hardware, software, charts and graphs.
-                </p>
-                <a
-                  class="btn btn-transparent btn-purple bottom-btn"
-                  target="_blank"
-                  href="http://editorarealize.com.br/revistas/conapesc/trabalhos/TRABALHO_EV070_MD1_SA16_ID1597_02052017190351.pdf"
-                  >Read</a
-                >
-              </div>
-            </div>
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title title-article">
-                  SPI Communication Between ARM CORTEX-M4 Microcotrollers TIVA C
-                  SERIES TM4C123GH6PM
-                </h5>
-                <p class="title-article">
-                  <span>Coauthor - II CONAPESC - 2017</span>
-                </p>
-                <p class="card-text text-justify text-left">
-                  The use of microcontrollers, more complete and complex than
-                  microprocessors, shows how technological advances can be
-                  increasingly present in our daily lives, such as electronic
-                  devices, security and monitoring systems, in an efficient and
-                  easily adaptable way through the study conducted
-                  microcontroller.
-                </p>
-
-                <a
-                  class="btn btn-transparent btn-purple bottom-btn"
-                  target="_blank"
-                  href="http://editorarealize.com.br/revistas/conapesc/trabalhos/TRABALHO_EV070_MD1_SA16_ID1595_12052017194333.pdf"
-                  >Read</a
-                >
-              </div>
-            </div>
-          </div>
-          <div class="card-group">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title title-article">
-                  Square Wave Inverter for Small Porte Photovoltaic Systems
-                </h5>
-                <p class="title-article">
-                  <span>Coauthor - II CONAPESC - 2017</span>
-                </p>
-                <p class="card-text text-justify text-left">
-                  This work was developed with the objective of building an
-                  equipment called inverter for a small photovoltaic system,
-                  intended for use in small home lighting. With each passing day
-                  the energy consumption increases, as well as the search for
-                  other sources of it. An abundant, cheap and clean source is
-                  solar energy. Although Brazil has one of the greatest
-                  potentials for generating this type of energy, it corresponds
-                  to less than 1% of the national energy matrix.
-                </p>
-                <a
-                  class="btn btn-transparent btn-purple bottom-btn"
-                  target="_blank"
-                  href="http://editorarealize.com.br/revistas/conapesc/trabalhos/TRABALHO_EV070_MD1_SA16_ID1409_02052017002734.pdf"
-                  >Read</a
-                >
-              </div>
-            </div>
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title title-article">
-                  CNC Printer Circuit Board Machine Using the Arduino and GRBL
-                  Open Code Plataforms
-                </h5>
-                <p class="title-article">
-                  <span>Coauthor - II CONAPESC - 2017</span>
-                </p>
-                <p class="card-text text-justify text-left">
-                  This paper presents the development of a computerized
-                  numerical control machine, CNC, using open source platforms
-                  focused on PCB, for research projects. Arduino and GRBL open
-                  source platforms were used in the design of this project,
-                  making it possible to build this type of machine at a lower
-                  cost.
-                </p>
-                <a
-                  class="btn btn-transparent btn-purple"
-                  target="_blank"
-                  href="http://editorarealize.com.br/revistas/conapesc/trabalhos/TRABALHO_EV070_MD1_SA16_ID1558_02052017142209.pdf"
-                  >Read</a
-                >
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      <section id="portifolio">
-        <h3>Portifolio</h3>
-
-        <div class="container-fluid centred">
-          <div class="card-group">
-            <div class="card">
-              <img
-                class="card-img-top"
-                src="images/farmabook.jpeg"
-                alt="Card image cap"
-              />
-              <div class="card-body">
-                <h5 class="card-title">Farmabook</h5>
-                <p class="card-text">
-                  Iterative learning system for pharmacology teaching, ongoing
-                  development.
-                </p>
-              </div>
-            </div>
-            <div class="card">
-              <img
-                class="card-img-top"
-                src="images/lab.jpeg"
-                alt="Card image cap"
-              />
-              <div class="card-body">
-                <h5 class="card-title">Lab UFC</h5>
-                <p class="card-text">
-                  System for laboratory access records developed during
-                  performance at the Laboratory of the Federal University of
-                  Ceará.
-                </p>
-              </div>
-            </div>
-            <div class="card">
-              <img
-                class="card-img-top"
-                src="images/ilumini.jpeg"
-                alt="Card image cap"
-              />
-              <div class="card-body">
-                <h5 class="card-title">Ilumini</h5>
-                <p class="card-text">
-                  Company presentation page and quotation and document
-                  generation.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="card-group">
-            <div class="card">
-              <img
-                class="card-img-top"
-                src="images/bird.jpeg"
-                alt="Card image cap"
-              />
-              <div class="card-body">
-                <h5 class="card-title">Bird Fly</h5>
-                <p class="card-text">
-                  Game Developed for Ios using Swift as final project in the
-                  discipline of programming paradigms.
-                </p>
-              </div>
-            </div>
-            <div class="card">
-              <img
-                class="card-img-top"
-                src="images/multplic.jpeg"
-                alt="Card image cap"
-              />
-              <div class="card-body">
-                <h5 class="card-title">Multiplic</h5>
-                <p class="card-text">
-                  File system for access and management of the activities of the
-                  company Multiplic Telecom.
-                </p>
-              </div>
-            </div>
-            <div class="card">
-              <img
-                class="card-img-top"
-                src="images/es.jpeg"
-                alt="Card image cap"
-              />
-              <div class="card-body">
-                <h5 class="card-title">pos-UFC</h5>
-                <p class="card-text">
-                  System developed for the Software Engineering discipline
-                  2018.1 - University Federal of Ceará.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="card-group" style="margin: 1em;">
-            <div class="card" hidden="true">
-              <img
-                class="card-img-top"
-                src="images/bird.jpeg"
-                alt="Card image cap"
-              />
-              <div class="card-body">
-                <h5 class="card-title">Be The Hero</h5>
-                <p class="card-text"></p>
-              </div>
-            </div>
-            <div class="card">
-              <img
-                class="card-img-top"
-                src="images/radardev.png"
-                alt="Card image cap"
-              />
-              <div class="card-body">
-                <h5 class="card-title">Radar Dev</h5>
-                
-                <p class="card-text">
-                  ReactJs and React Native application for listing devs on your
-                  perimeter.
-                </p>
-              </div>
-            </div>
-            <div class="card">
-              <img
-                class="card-img-top"
-                href="bellaskin.me"
-                src="images/bellaskin-min.png"
-                alt="Card image cap"
-              />
-              <div class="card-body">
-                <h5 class="card-title">BellaSkin</h5>
-                <p class="card-text">
-                  ReactJs building for Simple Product Shop for droppingship and
-                  digital marketing.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer class="page-footer font-small pt-4" id="contact">
-      <div class="container-fluid text-center text-md-left">
-        <div class="row">
-          <div class="col-md-12 mt-md-0 mt-3" style="text-align: center;">
-            <h1>Melisse Cabral</h1>
-
-            <p>Av. Dom José, 2285 - Sobral, CE</p>
-            <p>melissecabral@gmail.com</p>
-            <p>+55 85 9 99616120</p>
-
-            <div class="footer_actions">
-              <a
-                href="https://drive.google.com/file/d/13UgsZNCTBLttnPRNXODTN6Aj0LSqYYSd/view"
-                target="_blank"
-                class="btn btn-transparent noselectble downloadButton gr" style="font-size: 14px !important;"
-                >Download Resume</a
-              >
-              <ul class="ul-social noselectble">
-                <li class="li-social grow">
-                  <a target="_blank" href="https://github.com/MelisseCabral"
-                    ><img class="footer-ul" src="images/gh.png"
-                  /></a>
-                </li>
-                <li class="li-social grow">
-                  <a
-                    target="_blank"
-                    href="https://www.linkedin.com/in/melisse-p-cabral-48b963117/"
-                  >
-                    <img class="footer-ul" src="images/in.png"
-                  /></a>
-                </li>
-                <li class="li-social grow">
-                  <a
-                    target="_blank"
-                    href="https://www.facebook.com/melisse.cabral?ref=bookmarks"
-                  >
-                    <img class="footer-ul" src="images/fb.png"
-                  /></a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <hr class="clearfix w-100 d-md-none pb-3" />
-        </div>
       </div>
+    </div>
+  </section>
 
-      <!-- Copyright -->
-      <div class="footer-copyright text-center py-3">Made by <a class='collectionFree' href="https://github.com/melissecabral" rel="noopener noreferrer" target="_blank">Melisse Cabral</a>  </div>
-      <!-- Copyright -->
-    </footer>
-    <script
-      src="https://code.jquery.com/jquery-3.4.1.min.js"
-      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
-      crossorigin="anonymous"
-    ></script>
-    <script>
-      
-      function loaded() {
-        let l = document.getElementById("overlay");
-        l.classList.add("hidden");
-        console.log('loaded');
-      }
-      let l = document.getElementById("overlay");
-      l.classList.add("hidden");
-      console.log('loaded');
-      $(".skill-per").each(function() {
-      var $this = $(this);
-      var per = $this.attr("per");
-      $this.css("width", per + "%");
-      $({ animatedValue: 0 }).animate(
-          { animatedValue: per },
-          {
-            duration: 1000,
-            step: function() {
-              $this.attr("per", Math.floor(this.animatedValue) + "%");
-            },
-            complete: function() {
-              $this.attr("per", Math.floor(this.animatedValue) + "%");
-            }
-          }
-        );
-      });
-      
-    </script>
-    <script>
-      function calculaIdade() {
-        var date = new Date();
-        var year = date.getFullYear();
+  <!-- FOOTER -->
+  <footer>
+    <p>Designed &amp; built by <a href="https://github.com/MelisseCabral">Melisse Lima</a></p>
+  </footer>
 
-        var dateBirth = "07/07/1996".split("/");
-        var dayBirth = dateBirth[0];
-        var monthBirth = dateBirth[1];
-        var yearBirth = dateBirth[2];
-
-        var age = year - yearBirth;
-        var month = date.getMonth() + 1;
-
-        if (month < monthBirth) {
-          age--;
-        } else {
-          if (month == monthBirth) {
-            if (date.getDate() < dayBirth) {
-              age--;
-            }
-          }
+  <script>
+    // Smooth reveal on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
         }
-        return age;
-      }
+      });
+    }, { threshold: 0.08 });
 
-      const age = calculaIdade();
-      let text = document.getElementById("aboutMe").innerText;
-      text = text.replace("myage", age);
-      document.getElementById("aboutMe").innerText = text;
-    </script>
-    <!-- Footer -->
-  </body>
+    document.querySelectorAll('.timeline-item, .project-card, .edu-item, .cert-badge, .stat').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity .5s ease, transform .5s ease';
+      observer.observe(el);
+    });
+
+
+  </script>
+</body>
 </html>
-<script
-  async
-  src="https://www.googletagmanager.com/gtag/js?id=UA-155009059-1"
->
-</script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag() {
-    dataLayer.push(arguments);
-  }
-  gtag("js", new Date());
-
-  gtag("config", "UA-155009059-1");
-</script>
