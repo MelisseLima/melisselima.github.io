@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Architecture lessons from shipping a production React Native app  - Melisse Lima</title>
+  <meta name="description" content="What I learned about navigation, state management, and CI/CD after taking a React Native app from zero to the App Store and Google Play." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:         #0D0D10;
+      --surface:    #16161C;
+      --border:     #1E1E28;
+      --accent:     #4F9EFF;
+      --accent-dim: rgba(79,158,255,.12);
+      --text:       #F0F0F5;
+      --muted:      #8888A0;
+      --font:       'Inter', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(79,158,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,158,255,.025) 1px, transparent 1px);
+      background-size: 72px 72px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(13,13,16,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+    }
+
+    .nav-mark {
+      width: 36px;
+      height: 36px;
+      border: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .nav-mark::before, .nav-mark::after {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+    }
+    .nav-mark::before { top: -2px; left: -2px; }
+    .nav-mark::after  { bottom: -2px; right: -2px; }
+
+    .nav-name { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+
+    .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+    .nav-links a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: .04em;
+      transition: color .2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+
+    article { padding-top: 120px; padding-bottom: 120px; }
+
+    .post-header {
+      max-width: 720px;
+      margin: 0 auto 64px;
+      padding-bottom: 48px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color .2s;
+    }
+    .back-link:hover { color: var(--accent); }
+    .back-link svg { width: 13px; height: 13px; }
+
+    .post-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+
+    .post-category {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid rgba(79,158,255,.2);
+      padding: 3px 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .post-date, .post-read-time { font-size: 13px; color: var(--muted); }
+
+    .post-title {
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1.05;
+      margin-bottom: 20px;
+    }
+
+    .post-lead { font-size: 19px; color: var(--muted); line-height: 1.65; }
+
+    .post-content { max-width: 720px; margin: 0 auto; }
+
+    .post-content h2 {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -.5px;
+      color: var(--text);
+      margin: 56px 0 20px;
+    }
+
+    .post-content h3 {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 40px 0 14px;
+    }
+
+    .post-content p {
+      font-size: 17px;
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 24px;
+    }
+
+    .post-content p strong { color: var(--text); font-weight: 600; }
+
+    .post-content a { color: var(--accent); text-decoration: underline; text-decoration-color: rgba(79,158,255,.4); }
+    .post-content a:hover { text-decoration-color: var(--accent); }
+
+    .post-content ul, .post-content ol { margin: 0 0 24px 24px; }
+    .post-content li { font-size: 17px; color: var(--muted); line-height: 1.75; margin-bottom: 8px; }
+    .post-content li strong { color: var(--text); font-weight: 600; }
+
+    .post-content pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      padding: 24px;
+      overflow-x: auto;
+      margin: 32px 0;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .post-content code {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+      color: var(--accent);
+      font-size: 14px;
+    }
+
+    .post-content pre code { color: #C9D1D9; }
+
+    .post-content blockquote {
+      border-left: 3px solid var(--accent);
+      padding: 4px 24px;
+      margin: 32px 0;
+    }
+
+    .post-content blockquote p { font-size: 18px; font-style: italic; color: var(--text); }
+
+    .post-content hr { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+    footer { border-top: 1px solid var(--border); background: var(--surface); position: relative; z-index: 1; }
+    footer .container { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .footer-left { font-size: 13px; color: var(--muted); }
+    .footer-right { display: flex; gap: 24px; }
+    .footer-right a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color .2s; }
+    .footer-right a:hover { color: var(--accent); }
+
+    @media (max-width: 700px) {
+      .container { padding: 0 24px; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="container">
+      <a href="../../index.html" class="nav-logo">
+        <div class="nav-mark">ML</div>
+        <span class="nav-name">Melisse Lima</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="../../index.html#skills">Skills</a></li>
+        <li><a href="../../index.html#experience">Experience</a></li>
+        <li><a href="../../index.html#projects">Projects</a></li>
+        <li><a href="../../index.html#education">Education</a></li>
+        <li><a href="../index.html" class="active">Blog</a></li>
+        <li><a href="../../index.html#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <article>
+      <div class="container">
+
+        <div class="post-header">
+          <a href="../index.html" class="back-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Back to Blog
+          </a>
+
+          <div class="post-meta">
+            <span class="post-category">React Native</span>
+            <span class="post-date">May 2024</span>
+            <span class="post-read-time">· 6 min read</span>
+          </div>
+
+          <h1 class="post-title">Architecture lessons from shipping a production React Native app</h1>
+          <p class="post-lead">What I learned about navigation, state management, and CI/CD after taking a React Native app from zero to the App Store and Google Play.</p>
+        </div>
+
+        <div class="post-content">
+
+          <p>Shipping a React Native app is one thing. Shipping one that's maintainable six months later  - with a small team, real users, and a CI pipeline that doesn't break on a Tuesday  - is another thing entirely.</p>
+
+          <p>After going through this twice (once at Banco do Brasil, once building FitAI), I've collected a set of decisions I'd make the same way again and a few I'd do differently. Here they are.</p>
+
+          <h2>Navigation: commit to one approach early</h2>
+
+          <p>React Navigation is the standard and it's good. The mistake is treating it as an afterthought. Navigation structure bleeds into everything  - deep linking, auth guards, analytics, modals, tab state. If you sketch it on a whiteboard before writing a line of code, you'll save yourself a refactor later.</p>
+
+          <p>The pattern that worked for me: <strong>a root stack with an auth gate at the top</strong>, nested navigators per feature (tabs, stacks), and no navigation logic inside screens  - that lives in dedicated navigator files.</p>
+
+          <pre><code>// Root structure that scales
+&lt;NavigationContainer&gt;
+  &lt;RootStack.Navigator&gt;
+    {isAuthenticated
+      ? &lt;AppNavigator /&gt;   // tabs + feature stacks
+      : &lt;AuthNavigator /&gt;  // login / onboarding
+    }
+  &lt;/RootStack.Navigator&gt;
+&lt;/NavigationContainer&gt;</code></pre>
+
+          <h2>State management: boring is correct</h2>
+
+          <p>I've used Redux, Zustand, React Query, and combinations of all three. My current opinion: <strong>React Query for server state, Zustand for local UI state, nothing else</strong>. Redux is powerful but it's infrastructure. You'll spend real time on it. For most apps, you don't need that trade-off.</p>
+
+          <p>The hard part isn't picking a library  - it's deciding what counts as "server state" vs "UI state." Server state is anything that lives in a database somewhere and needs to stay in sync. Everything else is UI state. Keep them separate from day one.</p>
+
+          <blockquote>
+            <p>If your state management setup requires a tutorial to onboard a new developer, it's too complex.</p>
+          </blockquote>
+
+          <h2>Performance: profile before you optimise</h2>
+
+          <p>React Native apps are fast until they're not, and when they're not, the cause is almost never what you expect. In both projects, the performance issues I spent the most time on were:</p>
+
+          <ul>
+            <li><strong>FlatList without proper keyExtractor and getItemLayout</strong>  - re-renders on every scroll</li>
+            <li><strong>Image loading without caching</strong>  - react-native-fast-image solves this completely</li>
+            <li><strong>useEffect chains that fire on every render</strong>  - missing or wrong dependency arrays</li>
+            <li><strong>Heavy work on the JS thread</strong>  - anything compute-intensive should move to a native module or a web worker via react-native-workers</li>
+          </ul>
+
+          <p>Flipper's Performance plugin and Hermes' built-in profiler are your friends. Use them before reaching for memoisation  - <code>useMemo</code> and <code>useCallback</code> have overhead too, and adding them everywhere without measurement makes things worse.</p>
+
+          <h2>CI/CD: automate the painful parts</h2>
+
+          <p>Manual builds are a trap. The first time you miss a signing certificate rotation or ship a build with wrong environment variables, you'll spend the time to automate it. Do that first instead.</p>
+
+          <p>My current stack: <strong>GitHub Actions for test and lint on every PR, Fastlane for building and signing, and a single command to push to TestFlight and the Play Store internal track</strong>. The setup takes two to three days. It pays back within a month.</p>
+
+          <pre><code># .github/workflows/test.yml (simplified)
+on: [pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm ci
+      - run: npx jest --coverage
+      - run: npx eslint src/</code></pre>
+
+          <h2>The thing nobody talks about: env management</h2>
+
+          <p>React Native has no standard way to handle environment variables. Everyone does it differently and it causes real problems. The approach I use now: <strong>react-native-config</strong> for values that change per environment, a <code>.env.example</code> committed to the repo, and actual <code>.env</code> files only on CI via secrets.</p>
+
+          <p>Never hardcode a URL. Even if you're 100% sure it won't change, it will change, and you'll need to rebuild and resubmit to the App Store to fix a string.</p>
+
+          <hr />
+
+          <p>None of these decisions are revolutionary. The value is making them explicitly at the start of a project rather than discovering them through pain six months in. React Native is a mature platform now  - the architecture patterns that work are well understood. Use them.</p>
+
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-left">Designed &amp; built by Melisse Lima - 2026</div>
+      <div class="footer-right">
+        <a href="https://github.com/melisselima" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://linkedin.com/in/melisselima" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="mailto:melissecabral@gmail.com">Email</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

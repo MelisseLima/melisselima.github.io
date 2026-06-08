@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terraform for engineers who just want their app to run  - Melisse Lima</title>
+  <meta name="description" content="A practical guide to ECS, S3, and CloudFront from someone who came from the application layer and had to learn infrastructure the hard way." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:         #0D0D10;
+      --surface:    #16161C;
+      --border:     #1E1E28;
+      --accent:     #4F9EFF;
+      --accent-dim: rgba(79,158,255,.12);
+      --text:       #F0F0F5;
+      --muted:      #8888A0;
+      --font:       'Inter', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(79,158,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,158,255,.025) 1px, transparent 1px);
+      background-size: 72px 72px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(13,13,16,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+    }
+
+    .nav-mark {
+      width: 36px;
+      height: 36px;
+      border: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .nav-mark::before, .nav-mark::after {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+    }
+    .nav-mark::before { top: -2px; left: -2px; }
+    .nav-mark::after  { bottom: -2px; right: -2px; }
+
+    .nav-name { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+
+    .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+    .nav-links a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: .04em;
+      transition: color .2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+
+    article { padding-top: 120px; padding-bottom: 120px; }
+
+    .post-header {
+      max-width: 720px;
+      margin: 0 auto 64px;
+      padding-bottom: 48px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      text-decoration: none;
+      margin-bottom: 40px;
+      transition: color .2s;
+    }
+    .back-link:hover { color: var(--accent); }
+    .back-link svg { width: 13px; height: 13px; }
+
+    .post-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+
+    .post-category {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid rgba(79,158,255,.2);
+      padding: 3px 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .post-date, .post-read-time { font-size: 13px; color: var(--muted); }
+
+    .post-title {
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1.05;
+      margin-bottom: 20px;
+    }
+
+    .post-lead { font-size: 19px; color: var(--muted); line-height: 1.65; }
+
+    .post-content { max-width: 720px; margin: 0 auto; }
+
+    .post-content h2 {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -.5px;
+      color: var(--text);
+      margin: 56px 0 20px;
+    }
+
+    .post-content h3 {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 40px 0 14px;
+    }
+
+    .post-content p {
+      font-size: 17px;
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 24px;
+    }
+
+    .post-content p strong { color: var(--text); font-weight: 600; }
+
+    .post-content a { color: var(--accent); text-decoration: underline; text-decoration-color: rgba(79,158,255,.4); }
+    .post-content a:hover { text-decoration-color: var(--accent); }
+
+    .post-content ul, .post-content ol { margin: 0 0 24px 24px; }
+    .post-content li { font-size: 17px; color: var(--muted); line-height: 1.75; margin-bottom: 8px; }
+    .post-content li strong { color: var(--text); font-weight: 600; }
+
+    .post-content pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      padding: 24px;
+      overflow-x: auto;
+      margin: 32px 0;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .post-content code {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+      color: var(--accent);
+      font-size: 14px;
+    }
+
+    .post-content pre code { color: #C9D1D9; }
+
+    .post-content blockquote {
+      border-left: 3px solid var(--accent);
+      padding: 4px 24px;
+      margin: 32px 0;
+    }
+
+    .post-content blockquote p { font-size: 18px; font-style: italic; color: var(--text); }
+
+    .post-content hr { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+    footer { border-top: 1px solid var(--border); background: var(--surface); position: relative; z-index: 1; }
+    footer .container { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .footer-left { font-size: 13px; color: var(--muted); }
+    .footer-right { display: flex; gap: 24px; }
+    .footer-right a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color .2s; }
+    .footer-right a:hover { color: var(--accent); }
+
+    @media (max-width: 700px) {
+      .container { padding: 0 24px; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="container">
+      <a href="../../index.html" class="nav-logo">
+        <div class="nav-mark">ML</div>
+        <span class="nav-name">Melisse Lima</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="../../index.html#skills">Skills</a></li>
+        <li><a href="../../index.html#experience">Experience</a></li>
+        <li><a href="../../index.html#projects">Projects</a></li>
+        <li><a href="../../index.html#education">Education</a></li>
+        <li><a href="../index.html" class="active">Blog</a></li>
+        <li><a href="../../index.html#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <article>
+      <div class="container">
+
+        <div class="post-header">
+          <a href="../index.html" class="back-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 19"/></svg>
+            Back to Blog
+          </a>
+
+          <div class="post-meta">
+            <span class="post-category">AWS</span>
+            <span class="post-date">Jan 2024</span>
+            <span class="post-read-time">· 7 min read</span>
+          </div>
+
+          <h1 class="post-title">Terraform for engineers who just want their app to run</h1>
+          <p class="post-lead">A practical guide to ECS, S3, and CloudFront from someone who came from the application layer and had to learn infrastructure the hard way.</p>
+        </div>
+
+        <div class="post-content">
+
+          <p>I didn't come up through DevOps. I came through application code  - React, Node, mobile  - and at some point the team I was on stopped having a dedicated infrastructure person. So I learned Terraform by necessity, not by choice.</p>
+
+          <p>What I found is that most Terraform guides are written for people who already think in infrastructure terms. They explain HCL syntax and provider blocks, but they skip the mental model shift that application developers actually need. This post is the one I wish I'd had.</p>
+
+          <h2>The mental model: Terraform is just a diff tool</h2>
+
+          <p>Once this clicked, everything else made sense. Terraform doesn't configure your cloud  - it <strong>describes the desired state of your cloud and reconciles the difference</strong> between what you want and what exists. When you run <code>terraform apply</code>, it computes a diff (the plan) and executes only the changes needed.</p>
+
+          <p>This means the order of your code mostly doesn't matter. Terraform figures out the dependency graph. It also means you can run <code>terraform plan</code> any time to see exactly what will change  - without changing anything. That's your safety net. Use it obsessively before every apply.</p>
+
+          <blockquote>
+            <p>Always run <code>terraform plan</code> and read the output before <code>terraform apply</code>. Every time. Even for small changes.</p>
+          </blockquote>
+
+          <h2>The stack: ECS + S3 + CloudFront</h2>
+
+          <p>For a standard web app with an API backend and a static frontend, this is the setup I use. It's not the only way, but it's reliable, cost-effective, and well-supported by Terraform's AWS provider.</p>
+
+          <ul>
+            <li><strong>ECS (Fargate)</strong>  - runs your backend containers without managing EC2 instances</li>
+            <li><strong>S3</strong>  - hosts your static frontend build output</li>
+            <li><strong>CloudFront</strong>  - CDN in front of both, handles HTTPS and caching</li>
+            <li><strong>ECR</strong>  - stores your Docker images</li>
+            <li><strong>RDS or Aurora</strong>  - database, if needed</li>
+          </ul>
+
+          <p>Here's what the folder structure looks like before writing a single resource:</p>
+
+          <pre><code>infrastructure/
+├── main.tf          # provider config, backend
+├── variables.tf     # input variables
+├── outputs.tf       # values to export (URLs, ARNs)
+├── ecs.tf           # ECS cluster, service, task definition
+├── ecr.tf           # container registry
+├── s3.tf            # static site bucket
+├── cloudfront.tf    # CDN distribution
+├── network.tf       # VPC, subnets, security groups
+└── iam.tf           # roles and policies</code></pre>
+
+          <p>Splitting resources into separate files by service keeps things navigable. One massive <code>main.tf</code> works but you'll regret it when you're searching for a security group rule at midnight.</p>
+
+          <h2>Start with state  - before anything else</h2>
+
+          <p>Terraform's state file tracks what it has created. By default it lives locally at <code>terraform.tfstate</code>. That's fine for solo experiments. For anything real, <strong>store state remotely in S3 with a DynamoDB lock table</strong> from day one. Changing this later is painful.</p>
+
+          <pre><code># main.tf
+terraform {
+  backend "s3" {
+    bucket         = "my-app-terraform-state"
+    key            = "production/terraform.tfstate"
+    region         = "eu-west-1"
+    dynamodb_table = "terraform-lock"
+    encrypt        = true
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+}</code></pre>
+
+          <p>Create the S3 bucket and DynamoDB table manually first (just this once  - it's a chicken-and-egg problem). Everything else gets managed by Terraform.</p>
+
+          <h2>ECS Fargate: the parts that tripped me up</h2>
+
+          <p>ECS has a lot of moving parts. The mental model: a <strong>Cluster</strong> is just a logical boundary. A <strong>Service</strong> maintains N running copies of a <strong>Task</strong>. A Task is defined by a <strong>Task Definition</strong>, which is essentially a Docker run configuration.</p>
+
+          <pre><code># ecs.tf (simplified)
+resource "aws_ecs_cluster" "main" {
+  name = "${var.app_name}-cluster"
+}
+
+resource "aws_ecs_task_definition" "api" {
+  family                   = "${var.app_name}-api"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = 256
+  memory                   = 512
+  execution_role_arn       = aws_iam_role.ecs_execution.arn
+
+  container_definitions = jsonencode([{
+    name  = "api"
+    image = "${aws_ecr_repository.api.repository_url}:latest"
+    portMappings = [{ containerPort = 3000 }]
+    environment = [
+      { name = "NODE_ENV", value = "production" }
+    ]
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        awslogs-group         = "/ecs/${var.app_name}"
+        awslogs-region        = var.aws_region
+        awslogs-stream-prefix = "api"
+      }
+    }
+  }])
+}
+
+resource "aws_ecs_service" "api" {
+  name            = "${var.app_name}-api"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.api.arn
+  desired_count   = 2
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = var.private_subnet_ids
+    security_groups  = [aws_security_group.ecs_tasks.id]
+    assign_public_ip = false
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.api.arn
+    container_name   = "api"
+    container_port   = 3000
+  }
+}</code></pre>
+
+          <p>The two things that confused me most when I started:</p>
+
+          <ul>
+            <li><strong>The execution role vs the task role</strong>: the execution role is for ECS itself (pulling images, writing logs). The task role is for your application code (reading S3, calling other AWS services). They're different IAM roles. Don't conflate them.</li>
+            <li><strong>awsvpc network mode</strong>: Fargate requires it. Each task gets its own network interface. Security groups apply at the task level, not the instance level. This is good  - it means finer-grained control  - but it means your SG rules need to explicitly allow inbound from your load balancer.</li>
+          </ul>
+
+          <h2>S3 + CloudFront for static sites</h2>
+
+          <p>The pattern is straightforward but has a gotcha around bucket access. The current best practice is <strong>Origin Access Control (OAC)</strong>, not the older Origin Access Identity (OAI). Keep the S3 bucket private  - CloudFront accesses it via OAC, users never hit S3 directly.</p>
+
+          <pre><code># s3.tf
+resource "aws_s3_bucket" "frontend" {
+  bucket = "${var.app_name}-frontend"
+}
+
+resource "aws_s3_bucket_public_access_block" "frontend" {
+  bucket                  = aws_s3_bucket.frontend.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# cloudfront.tf
+resource "aws_cloudfront_origin_access_control" "frontend" {
+  name                              = "${var.app_name}-oac"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
+resource "aws_cloudfront_distribution" "frontend" {
+  origin {
+    domain_name              = aws_s3_bucket.frontend.bucket_regional_domain_name
+    origin_id                = "s3-frontend"
+    origin_access_control_id = aws_cloudfront_origin_access_control.frontend.id
+  }
+
+  enabled             = true
+  default_root_object = "index.html"
+
+  default_cache_behavior {
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    target_origin_id       = "s3-frontend"
+    viewer_protocol_policy = "redirect-to-https"
+
+    forwarded_values {
+      query_string = false
+      cookies { forward = "none" }
+    }
+  }
+
+  # SPA routing  - serve index.html for 404s
+  custom_error_response {
+    error_code         = 404
+    response_code      = 200
+    response_page_path = "/index.html"
+  }
+
+  restrictions {
+    geo_restriction { restriction_type = "none" }
+  }
+
+  viewer_certificate {
+    acm_certificate_arn = var.acm_certificate_arn
+    ssl_support_method  = "sni-only"
+  }
+}</code></pre>
+
+          <p>The <code>custom_error_response</code> block is critical for SPAs  - without it, any direct URL hit that isn't the root will return a 403 from S3. Your React Router or Next.js routes will silently break in production.</p>
+
+          <h2>Deploying new code without Terraform</h2>
+
+          <p>This is the thing nobody explains clearly: <strong>Terraform manages infrastructure, not application deployments</strong>. Once your ECS service and CloudFront distribution exist, you don't re-run Terraform to push new code.</p>
+
+          <p>For ECS, a new deploy is: build a new Docker image → push to ECR → force a new ECS service deployment. For the frontend, it's: build → sync to S3 → invalidate CloudFront cache. Both of these belong in your CI pipeline, not in Terraform.</p>
+
+          <pre><code># CI deploy commands (GitHub Actions / CircleCI / etc.)
+
+# Backend
+docker build -t $ECR_REPO:$COMMIT_SHA .
+docker push $ECR_REPO:$COMMIT_SHA
+aws ecs update-service \
+  --cluster my-cluster \
+  --service my-api \
+  --force-new-deployment
+
+# Frontend
+npm run build
+aws s3 sync dist/ s3://my-frontend-bucket --delete
+aws cloudfront create-invalidation \
+  --distribution-id $CF_DISTRIBUTION_ID \
+  --paths "/*"</code></pre>
+
+          <hr />
+
+          <p>Infrastructure as code pays for itself the first time you need to recreate an environment  - staging parity, disaster recovery, or just onboarding a new developer. The initial investment is real, but you stop being afraid of your own cloud setup. That's worth a lot.</p>
+
+          <p>The repo I use as a starting point for new projects is a stripped version of everything above. If you want the full module, reach out.</p>
+
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-left">Designed &amp; built by Melisse Lima - 2026</div>
+      <div class="footer-right">
+        <a href="https://github.com/melisselima" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://linkedin.com/in/melisselima" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="mailto:melissecabral@gmail.com">Email</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

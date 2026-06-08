@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog  - Melisse Lima</title>
+  <meta name="description" content="Writing about software engineering, React Native, Node.js, AWS, and building products." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:         #0D0D10;
+      --surface:    #16161C;
+      --border:     #1E1E28;
+      --accent:     #4F9EFF;
+      --accent-dim: rgba(79,158,255,.12);
+      --text:       #F0F0F5;
+      --muted:      #8888A0;
+      --font:       'Inter', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(79,158,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,158,255,.025) 1px, transparent 1px);
+      background-size: 72px 72px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(13,13,16,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+    }
+
+    .nav-mark {
+      width: 36px;
+      height: 36px;
+      border: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .nav-mark::before, .nav-mark::after {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+    }
+    .nav-mark::before { top: -2px; left: -2px; }
+    .nav-mark::after  { bottom: -2px; right: -2px; }
+
+    .nav-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: .04em;
+      transition: color .2s;
+    }
+    .nav-links a:hover,
+    .nav-links a.active { color: var(--accent); }
+
+    /* HEADER */
+    .page-header {
+      padding-top: 140px;
+      padding-bottom: 64px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .page-title {
+      font-size: clamp(40px, 5vw, 64px);
+      font-weight: 800;
+      letter-spacing: -2.5px;
+      line-height: .95;
+    }
+
+    /* POST LIST */
+    .post-list {
+      padding: 64px 0 120px;
+    }
+
+    .post-item {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 48px;
+      padding: 48px 0;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none;
+      transition: border-color .2s;
+    }
+    .post-item:first-child { border-top: 1px solid var(--border); }
+    .post-item:hover { border-color: var(--accent); }
+    .post-item:hover .post-title { color: var(--accent); }
+
+    .post-date {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: .06em;
+      padding-top: 4px;
+    }
+
+    .post-body { display: flex; flex-direction: column; gap: 12px; }
+
+    .post-category {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid rgba(79,158,255,.2);
+      padding: 3px 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      width: fit-content;
+    }
+
+    .post-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -.4px;
+      line-height: 1.25;
+      transition: color .2s;
+    }
+
+    .post-excerpt {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 640px;
+    }
+
+    .post-read {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: 4px;
+    }
+
+    .post-read svg { width: 13px; height: 13px; transition: transform .2s; }
+    .post-item:hover .post-read svg { transform: translateX(3px); }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      position: relative;
+      z-index: 1;
+    }
+
+    footer .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .footer-left { font-size: 13px; color: var(--muted); }
+
+    .footer-right { display: flex; gap: 24px; }
+    .footer-right a {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .footer-right a:hover { color: var(--accent); }
+
+    @media (max-width: 700px) {
+      .container { padding: 0 24px; }
+      .post-item { grid-template-columns: 1fr; gap: 12px; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="container">
+      <a href="../index.html" class="nav-logo">
+        <div class="nav-mark">ML</div>
+        <span class="nav-name">Melisse Lima</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="../index.html#skills">Skills</a></li>
+        <li><a href="../index.html#experience">Experience</a></li>
+        <li><a href="../index.html#projects">Projects</a></li>
+        <li><a href="../index.html#education">Education</a></li>
+        <li><a href="index.html" class="active">Blog</a></li>
+        <li><a href="../index.html#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <div class="container">
+        <div class="eyebrow">Writing</div>
+        <h1 class="page-title">Blog</h1>
+      </div>
+    </div>
+
+    <div class="post-list">
+      <div class="container">
+
+        <a href="react-native-architecture-lessons/index.html" class="post-item">
+          <div class="post-date">May 2024</div>
+          <div class="post-body">
+            <span class="post-category">React Native</span>
+            <div class="post-title">Architecture lessons from shipping a production React Native app</div>
+            <p class="post-excerpt">What I learned about navigation, state management, and CI/CD after taking a React Native app from zero to the App Store and Google Play.</p>
+            <span class="post-read">
+              Read more
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </span>
+          </div>
+        </a>
+
+        <a href="multistage-docker-builds/index.html" class="post-item">
+          <div class="post-date">Mar 2024</div>
+          <div class="post-body">
+            <span class="post-category">Docker</span>
+            <div class="post-title">Multi-stage targeted Docker builds: smaller images, faster deploys</div>
+            <p class="post-excerpt">How to use multi-stage builds and build targets to cut your production image size dramatically and stop shipping your dev dependencies to production.</p>
+            <span class="post-read">
+              Read more
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </span>
+          </div>
+        </a>
+
+        <a href="terraform-aws-for-engineers/index.html" class="post-item">
+          <div class="post-date">Jan 2024</div>
+          <div class="post-body">
+            <span class="post-category">AWS</span>
+            <div class="post-title">Terraform for engineers who just want their app to run</div>
+            <p class="post-excerpt">A practical guide to ECS, S3, and CloudFront from someone who came from the application layer and had to learn infrastructure the hard way.</p>
+            <span class="post-read">
+              Read more
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-left">Designed &amp; built by Melisse Lima - 2026</div>
+      <div class="footer-right">
+        <a href="https://github.com/melisselima" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://linkedin.com/in/melisselima" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="mailto:melissecabral@gmail.com">Email</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

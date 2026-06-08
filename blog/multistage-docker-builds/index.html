@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multi-stage targeted Docker builds: smaller images, faster deploys  - Melisse Lima</title>
+  <meta name="description" content="How to use multi-stage builds and build targets to cut your production image size dramatically and stop shipping your dev dependencies to production." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:         #0D0D10;
+      --surface:    #16161C;
+      --border:     #1E1E28;
+      --accent:     #4F9EFF;
+      --accent-dim: rgba(79,158,255,.12);
+      --text:       #F0F0F5;
+      --muted:      #8888A0;
+      --font:       'Inter', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(79,158,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,158,255,.025) 1px, transparent 1px);
+      background-size: 72px 72px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(13,13,16,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .nav-logo { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+
+    .nav-mark {
+      width: 36px; height: 36px;
+      border: 2px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 800; color: var(--accent);
+      letter-spacing: -0.5px; flex-shrink: 0; position: relative;
+    }
+    .nav-mark::before, .nav-mark::after {
+      content: ''; position: absolute; width: 8px; height: 8px; background: var(--accent);
+    }
+    .nav-mark::before { top: -2px; left: -2px; }
+    .nav-mark::after  { bottom: -2px; right: -2px; }
+
+    .nav-name { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+
+    .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+    .nav-links a {
+      font-size: 13px; font-weight: 500; color: var(--muted);
+      text-decoration: none; letter-spacing: .04em; transition: color .2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+
+    article { padding-top: 120px; padding-bottom: 120px; }
+
+    .post-header {
+      max-width: 720px; margin: 0 auto 64px;
+      padding-bottom: 48px; border-bottom: 1px solid var(--border);
+    }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 600; color: var(--muted);
+      text-decoration: none; margin-bottom: 40px; transition: color .2s;
+    }
+    .back-link:hover { color: var(--accent); }
+    .back-link svg { width: 13px; height: 13px; }
+
+    .post-meta { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+
+    .post-category {
+      font-size: 11px; font-weight: 700; color: var(--accent);
+      background: var(--accent-dim); border: 1px solid rgba(79,158,255,.2);
+      padding: 3px 10px; letter-spacing: .08em; text-transform: uppercase;
+    }
+
+    .post-date, .post-read-time { font-size: 13px; color: var(--muted); }
+
+    .post-title {
+      font-size: clamp(32px, 4vw, 52px); font-weight: 800;
+      letter-spacing: -2px; line-height: 1.05; margin-bottom: 20px;
+    }
+
+    .post-lead { font-size: 19px; color: var(--muted); line-height: 1.65; }
+
+    .post-content { max-width: 720px; margin: 0 auto; }
+
+    .post-content h2 {
+      font-size: 26px; font-weight: 800; letter-spacing: -.5px;
+      color: var(--text); margin: 56px 0 20px;
+    }
+
+    .post-content h3 {
+      font-size: 19px; font-weight: 700; color: var(--text); margin: 40px 0 14px;
+    }
+
+    .post-content p {
+      font-size: 17px; color: var(--muted); line-height: 1.75; margin-bottom: 24px;
+    }
+
+    .post-content p strong { color: var(--text); font-weight: 600; }
+
+    .post-content a { color: var(--accent); text-decoration: underline; text-decoration-color: rgba(79,158,255,.4); }
+    .post-content a:hover { text-decoration-color: var(--accent); }
+
+    .post-content ul, .post-content ol { margin: 0 0 24px 24px; }
+    .post-content li { font-size: 17px; color: var(--muted); line-height: 1.75; margin-bottom: 8px; }
+    .post-content li strong { color: var(--text); font-weight: 600; }
+
+    .post-content pre {
+      background: var(--surface); border: 1px solid var(--border);
+      border-left: 3px solid var(--accent); padding: 24px;
+      overflow-x: auto; margin: 32px 0; font-size: 14px; line-height: 1.6;
+    }
+
+    .post-content code {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+      color: var(--accent); font-size: 14px;
+    }
+
+    .post-content pre code { color: #C9D1D9; }
+
+    .post-content blockquote {
+      border-left: 3px solid var(--accent); padding: 4px 24px; margin: 32px 0;
+    }
+
+    .post-content blockquote p { font-size: 18px; font-style: italic; color: var(--text); }
+
+    .post-content hr { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+    /* comparison table */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      margin: 32px 0;
+    }
+
+    .compare-cell {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 20px 24px;
+    }
+
+    .compare-cell.bad  { border-top: 2px solid #EF4444; }
+    .compare-cell.good { border-top: 2px solid #22C55E; }
+
+    .compare-label {
+      font-size: 11px; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; margin-bottom: 10px;
+    }
+
+    .compare-cell.bad  .compare-label { color: #EF4444; }
+    .compare-cell.good .compare-label { color: #22C55E; }
+
+    .compare-cell p { font-size: 14px; color: var(--muted); margin: 0; line-height: 1.6; }
+
+    footer { border-top: 1px solid var(--border); background: var(--surface); position: relative; z-index: 1; }
+    footer .container { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .footer-left { font-size: 13px; color: var(--muted); }
+    .footer-right { display: flex; gap: 24px; }
+    .footer-right a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color .2s; }
+    .footer-right a:hover { color: var(--accent); }
+
+    @media (max-width: 700px) {
+      .container { padding: 0 24px; }
+      .nav-links { display: none; }
+      .compare { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="container">
+      <a href="../../index.html" class="nav-logo">
+        <div class="nav-mark">ML</div>
+        <span class="nav-name">Melisse Lima</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="../../index.html#skills">Skills</a></li>
+        <li><a href="../../index.html#experience">Experience</a></li>
+        <li><a href="../../index.html#projects">Projects</a></li>
+        <li><a href="../../index.html#education">Education</a></li>
+        <li><a href="../index.html" class="active">Blog</a></li>
+        <li><a href="../../index.html#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <article>
+      <div class="container">
+
+        <div class="post-header">
+          <a href="../index.html" class="back-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 19"/></svg>
+            Back to Blog
+          </a>
+
+          <div class="post-meta">
+            <span class="post-category">Docker</span>
+            <span class="post-date">Mar 2024</span>
+            <span class="post-read-time">· 6 min read</span>
+          </div>
+
+          <h1 class="post-title">Multi-stage targeted Docker builds: smaller images, faster deploys</h1>
+          <p class="post-lead">How to use multi-stage builds and build targets to cut your production image size dramatically and stop shipping your dev dependencies to production.</p>
+        </div>
+
+        <div class="post-content">
+
+          <p>A Node.js app with a naive Dockerfile will produce an image north of 1 GB. The same app with a properly structured multi-stage build lands under 200 MB. That's not a rounding error  - it's the difference between a 90-second deploy and a 15-second deploy, and between a container that exposes a full build toolchain and one that contains only what needs to run.</p>
+
+          <p>This is the pattern I use on every project now. It took me longer than it should have to learn it properly, so here's the version I wish someone had shown me.</p>
+
+          <h2>What single-stage builds get wrong</h2>
+
+          <p>The typical first-pass Dockerfile looks something like this:</p>
+
+          <pre><code># The naive approach
+FROM node:20
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+CMD ["node", "dist/index.js"]</code></pre>
+
+          <p>This works. But the final image contains:</p>
+
+          <ul>
+            <li>The full Node.js runtime <em>and</em> all of npm</li>
+            <li>Every dev dependency  - TypeScript, ts-node, Jest, ESLint, all of it</li>
+            <li>Your source files, not just the compiled output</li>
+            <li>The entire build toolchain that compiled your code</li>
+          </ul>
+
+          <p>You ship all of that to production, on every deploy, through every environment. It sits in your container registry eating storage. It gets scanned for vulnerabilities. And none of it needs to be there.</p>
+
+          <h2>Multi-stage builds: the concept</h2>
+
+          <p>A multi-stage Dockerfile is a single file with multiple <code>FROM</code> instructions. Each <code>FROM</code> starts a new stage with its own filesystem. <strong>Crucially, you can copy specific files between stages  - and only those files end up in the final image.</strong></p>
+
+          <p>The build stages are ephemeral. Docker uses them to produce the output you need, then discards them. Your final image only contains what you explicitly copy into the last stage.</p>
+
+          <h2>A production-ready Node.js Dockerfile</h2>
+
+          <pre><code># ── Stage 1: install dependencies ─────────────────────
+FROM node:20-alpine AS deps
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --frozen-lockfile
+
+# ── Stage 2: build ─────────────────────────────────────
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npm run build
+
+# ── Stage 3: production runtime ────────────────────────
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+
+# Only copy production deps and compiled output
+COPY package*.json ./
+RUN npm ci --frozen-lockfile --omit=dev
+
+COPY --from=builder /app/dist ./dist
+
+EXPOSE 3000
+CMD ["node", "dist/index.js"]</code></pre>
+
+          <div class="compare">
+            <div class="compare-cell bad">
+              <div class="compare-label">Single-stage</div>
+              <p>~1.1 GB  - full Node image, all deps, source files, build tools</p>
+            </div>
+            <div class="compare-cell good">
+              <div class="compare-label">Multi-stage</div>
+              <p>~180 MB  - Alpine base, prod deps only, compiled output only</p>
+            </div>
+          </div>
+
+          <p>A few things worth calling out:</p>
+
+          <ul>
+            <li><strong><code>node:20-alpine</code> instead of <code>node:20</code></strong>: Alpine Linux is a minimal distro. Switching base image alone drops ~600 MB. Use it in every stage unless you have a specific reason not to.</li>
+            <li><strong><code>npm ci --frozen-lockfile</code></strong>: faster than <code>npm install</code>, deterministic, and fails loudly if <code>package-lock.json</code> is out of sync  - exactly what you want in CI.</li>
+            <li><strong>Separating <code>deps</code> from <code>builder</code></strong>: Docker layer caching means the <code>npm ci</code> step only re-runs when <code>package*.json</code> changes. Source code changes don't invalidate the dependency layer.</li>
+          </ul>
+
+          <h2>Build targets: one Dockerfile for every environment</h2>
+
+          <p>This is where it gets powerful. Instead of maintaining separate Dockerfiles for dev and production, use <strong>named targets</strong> in a single file and build to whichever stage you need.</p>
+
+          <pre><code># ── Stage 1: base ──────────────────────────────────────
+FROM node:20-alpine AS base
+WORKDIR /app
+COPY package*.json ./
+
+# ── Stage 2: dev ───────────────────────────────────────
+FROM base AS dev
+RUN npm install
+COPY . .
+CMD ["npm", "run", "dev"]   # hot reload, source maps, all dev tooling
+
+# ── Stage 3: test ──────────────────────────────────────
+FROM base AS test
+RUN npm install
+COPY . .
+CMD ["npm", "run", "test"]  # run once, exit  - used in CI
+
+# ── Stage 4: builder ───────────────────────────────────
+FROM base AS builder
+RUN npm ci --frozen-lockfile
+COPY . .
+RUN npm run build
+
+# ── Stage 5: production ────────────────────────────────
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY package*.json ./
+RUN npm ci --frozen-lockfile --omit=dev
+COPY --from=builder /app/dist ./dist
+EXPOSE 3000
+CMD ["node", "dist/index.js"]</code></pre>
+
+          <p>Now you can target exactly the stage you need:</p>
+
+          <pre><code># Local development (hot reload, full deps)
+docker build --target dev -t myapp:dev .
+
+# Run tests in CI (same environment, deterministic)
+docker build --target test -t myapp:test .
+docker run --rm myapp:test
+
+# Production deploy (minimal, hardened)
+docker build --target runner -t myapp:prod .
+docker push myapp:prod</code></pre>
+
+          <blockquote>
+            <p>One Dockerfile. Every environment. No drift between what you test locally and what runs in production.</p>
+          </blockquote>
+
+          <h2>Layer caching in CI: the detail that makes deploys fast</h2>
+
+          <p>Multi-stage builds only help if Docker's layer cache is warm. In CI, the cache is cold on every run by default  - which means all that work structuring your stages gets thrown away.</p>
+
+          <p>The fix is <strong>inline cache</strong> (or registry cache, depending on your setup). With GitHub Actions and BuildKit:</p>
+
+          <pre><code># .github/workflows/deploy.yml
+- name: Build and push
+  uses: docker/build-push-action@v5
+  with:
+    context: .
+    target: runner
+    push: true
+    tags: ${{ env.IMAGE_TAG }}
+    cache-from: type=gha
+    cache-to: type=gha,mode=max</code></pre>
+
+          <p>The <code>type=gha</code> cache stores layer data in GitHub Actions cache. Subsequent runs restore it. On a warm cache, a deploy that took 4 minutes cold takes under 40 seconds  - because only the changed layers rebuild.</p>
+
+          <h2>A few more things worth doing</h2>
+
+          <ul>
+            <li><strong>Run as a non-root user</strong>: add <code>USER node</code> before <code>CMD</code> in your production stage. The node image ships with a <code>node</code> user for exactly this purpose. Running as root in a container is a security risk with no upside.</li>
+            <li><strong>Use <code>.dockerignore</code></strong>: it works like <code>.gitignore</code> and prevents <code>COPY . .</code> from sending <code>node_modules</code>, <code>.git</code>, and test fixtures into the build context. Without it, those get hashed on every build even if they're never used.</li>
+            <li><strong>Pin your base image version</strong>: <code>node:20-alpine</code> is fine; <code>node:20.11.1-alpine3.19</code> is better. Tags like <code>20-alpine</code> are mutable  - the image they point to can change under you. Pinning the patch version makes builds reproducible.</li>
+          </ul>
+
+          <hr />
+
+          <p>None of this is complex. The Dockerfile above is maybe 30 lines. But the difference it makes  - smaller attack surface, faster CI, no dev tooling in production  - compounds across every deploy for the lifetime of the project. Worth the 30 minutes to set it up right the first time.</p>
+
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-left">Designed &amp; built by Melisse Lima - 2026</div>
+      <div class="footer-right">
+        <a href="https://github.com/melisselima" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://linkedin.com/in/melisselima" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="mailto:melissecabral@gmail.com">Email</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
